@@ -17,5 +17,7 @@ namespace WatchGuard.RoverApi.Exercise.Api
         public static string PageFormat = "page={0}";
 
         public static int PhotosPerPage = 25;
+
+        public static int ChunkDownloadBy = 5;
     }
 }

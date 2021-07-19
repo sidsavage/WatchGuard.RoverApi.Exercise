@@ -8,5 +8,7 @@ namespace WatchGuard.RoverApi.Exercise.Actions
     public interface IImageApi
     {
         public Task<List<MarsRoverPhotoData>> GetImageDataAsync(HttpClient client, List<string> apiUrls);
+
+        public Task DownloadImages(HttpClient client, List<string> ImagesToDownload);
     }
 }

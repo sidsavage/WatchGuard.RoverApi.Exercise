@@ -1,10 +1,14 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using WatchGuard.RoverApi.Exercise.Actions;
+using WatchGuard.RoverApi.Exercise.Extensions;
+using WatchGuard.RoverApi.Exercise.Helpers;
 using WatchGuard.RoverApi.Exercise.Models;
 
 namespace WatchGuard.RoverApi.Exercise.Api
@@ -15,6 +19,13 @@ namespace WatchGuard.RoverApi.Exercise.Api
         {
             PropertyNameCaseInsensitive = true
         };
+
+        private readonly IOptions<ApiOptions> _dataOptions;
+
+        public MarsRoverImageApi(IOptions<ApiOptions> options)
+        {
+            _dataOptions = options;
+        }
 
         public static string GenerateUrl(string apiKey, string date)
         {
@@ -61,6 +72,45 @@ namespace WatchGuard.RoverApi.Exercise.Api
             Console.WriteLine($"Retrieved {distinctResults.Count} image datum(s).");
 
             return distinctResults;
+        }
+
+        public async Task DownloadImages(HttpClient client, List<string> imagesToDownload)
+        {
+            Console.WriteLine($"Begin file download of { imagesToDownload.Count } image(s).");
+
+            var imagesNotDownloaded = imagesToDownload.Where(imageUrl =>
+            {
+                var localFile = Path.Combine(Environment.CurrentDirectory, _dataOptions.Value.DataFolderName,
+                                            Path.GetFileName(imageUrl));
+
+                if (File.Exists(localFile))
+                    return false;
+
+                return true;
+            })
+            .ToList();
+
+            if (imagesNotDownloaded.Count < imagesToDownload.Count)
+                Console.WriteLine($"{imagesToDownload.Count - imagesNotDownloaded.Count} image(s) have already been downloaded");
+
+            var chunkedImageStrings = imagesNotDownloaded.Chunk(MarsRoverApiSettings.ChunkDownloadBy).ToList();
+
+            foreach (var chunkedImageString in chunkedImageStrings)
+            {
+                var downloadImageTasks = imagesNotDownloaded.Select(async (imageUrl) =>
+                {
+                    var localFilePath = Path.Combine(Environment.CurrentDirectory, _dataOptions.Value.DataFolderName,
+                                                Path.GetFileName(imageUrl));
+
+                    var photoBytes = await client.GetByteArrayAsync(imageUrl);
+
+                    await File.WriteAllBytesAsync(localFilePath, photoBytes);
+                });
+
+                await Task.WhenAll(downloadImageTasks);
+            }
+
+            Console.WriteLine($"{imagesNotDownloaded.Count} image(s) have been downloaded");
         }
     }
 }

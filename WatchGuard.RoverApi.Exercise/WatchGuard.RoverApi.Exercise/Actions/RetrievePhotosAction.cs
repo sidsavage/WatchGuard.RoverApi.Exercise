@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,14 +30,20 @@ namespace WatchGuard.RoverApi.Exercise.Actions
 
         public async Task ExecuteAsync()
         {
+            //Read dates from file
             var earthDateResults = await _earthDateHelper.GetEarthDatesAsync();
             AuditHelper.Audit(earthDateResults.UnformattableDateEntries);
 
+            //Get image data for given dates
             var apiUrlStrings = new List<string>();
             foreach (var earthDate in earthDateResults.FormattedEarthDates)
                 apiUrlStrings.Add(MarsRoverImageApi.GenerateUrl(_options.Value.ApiKey, earthDate));
 
             var imageData = await _imageApi.GetImageDataAsync(_httpClient, apiUrlStrings);
+
+            //Download images
+            var imageUrls = imageData.Select(imageDatum => imageDatum.Img_Src).ToList();
+            await _imageApi.DownloadImages(_httpClient, imageUrls);
         }
     }
 }

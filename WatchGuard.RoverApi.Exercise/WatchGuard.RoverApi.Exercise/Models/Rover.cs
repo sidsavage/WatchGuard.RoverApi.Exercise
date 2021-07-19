@@ -15,5 +15,6 @@ namespace WatchGuard.RoverApi.Exercise.Models
         public string Launch_Date { get; set; }
 
         public string Status { get; set; }
+
     }
 }
