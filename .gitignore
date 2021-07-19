@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/WatchGuard.RoverApi.Exercise/.vs/WatchGuard.RoverApi.Exercise/v16
+/WatchGuard.RoverApi.Exercise/.vs/WatchGuard.RoverApi.Exercise/config
+/WatchGuard.RoverApi.Exercise/WatchGuard.RoverApi.Exercise/bin/Debug/netcoreapp3.1
+/WatchGuard.RoverApi.Exercise/WatchGuard.RoverApi.Exercise/obj
