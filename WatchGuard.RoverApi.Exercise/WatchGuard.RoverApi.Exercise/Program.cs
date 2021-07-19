@@ -2,8 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using WatchGuard.RoverApi.Exercise.Actions;
+using WatchGuard.RoverApi.Exercise.Api;
 using WatchGuard.RoverApi.Exercise.Helpers;
 using WatchGuard.RoverApi.Exercise.Interfaces;
 
@@ -29,6 +31,8 @@ namespace WatchGuard.RoverApi.Exercise
             services.Configure<ApiOptions>(hostContext.Configuration.GetSection("ApiOptions"));
             services.AddTransient<IEarthDateHelper, EarthDateHelper>();
             services.AddTransient<RetrievePhotosAction>();
+            services.AddSingleton<HttpClient>();
+            services.AddTransient<IImageApi, MarsRoverImageApi>();
         });
     }
 }
